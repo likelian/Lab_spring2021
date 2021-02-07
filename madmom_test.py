@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import madmom
+
 """
 https://github.com/CPJKU/madmom_tutorials/blob/master/audio_signal_handling.ipynb
 """
@@ -39,4 +40,22 @@ decode = DeepChromaChordRecognitionProcessor()
 from madmom.processors import SequentialProcessor
 chordrec = SequentialProcessor([dcp, decode])
 chords = chordrec('sounds/wawu.wav')
-print(chords)
+
+np_chords = np.empty((len(chords),3), dtype=object)
+for idx, e in enumerate(chords):
+    np_chords[idx] = np.array([e[0], e[1], e[2]], dtype=object)
+
+np_chords = np_chords.transpose()
+noteOn = np_chords[0]
+noteOff = np_chords[1]
+
+RBI = madmom.evaluation.chords.chords(np_chords[2]) # ‘root’, ‘bass’, and ‘intervals’
+
+np_RBI = np.empty((len(chords), 3), dtype=object)
+for idx, e in enumerate(RBI):
+    np_RBI[idx] = np.array([e[0], e[1], e[2]], dtype=object)
+
+np_RBI = np_RBI.transpose()
+roots = np_RBI[0]
+
+print(noteOn)
