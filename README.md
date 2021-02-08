@@ -14,7 +14,7 @@
 - Tempo?
 
 
-**To-do (2/8 - 2/14):**
+**Next Week (2/8 - 2/14):**
 1. checkout Studio One
 2. finish midi for bass
 3. Come up with an alternative plan if one or current libraries doesn’t work (individual tracks?)
