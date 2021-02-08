@@ -1,9 +1,16 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import madmom
+from madmom.audio.chroma import DeepChromaProcessor
+from madmom.features.chords import DeepChromaChordRecognitionProcessor
+from madmom.processors import SequentialProcessor
+import mido
+from mido import Message, MidiFile, MidiTrack
 
 """
 https://github.com/CPJKU/madmom_tutorials/blob/master/audio_signal_handling.ipynb
+
+https://mido.readthedocs.io/en/latest/midi_files.html
 """
 
 #there is both a function and a class performing the same task
@@ -28,8 +35,6 @@ https://github.com/CPJKU/madmom_tutorials/blob/master/audio_signal_handling.ipyn
 #spec.shape, spec.bin_frequencies
 #spec.stft.frames.overlap_factor
 
-from madmom.audio.chroma import DeepChromaProcessor
-from madmom.features.chords import DeepChromaChordRecognitionProcessor
 
 #madmom.audio.chroma.DeepChromaProcessor(fmin=65, fmax=2100, unique_filters=True, models=None, **kwargs)
 dcp = madmom.audio.chroma.DeepChromaProcessor()
@@ -37,7 +42,6 @@ dcp = madmom.audio.chroma.DeepChromaProcessor()
 decode = DeepChromaChordRecognitionProcessor()
 #chords = decode(chroma)
 
-from madmom.processors import SequentialProcessor
 chordrec = SequentialProcessor([dcp, decode])
 chords = chordrec('sounds/wawu.wav')
 
@@ -58,4 +62,25 @@ for idx, e in enumerate(RBI):
 np_RBI = np_RBI.transpose()
 roots = np_RBI[0]
 
-print(noteOn)
+
+
+mid = MidiFile()
+track = MidiTrack()
+mid.tracks.append(track)
+
+
+track.append(Message('program_change', program=33, time=0))
+for idx, e in enumerate(roots):
+    pitch = e + 24
+    #tickStart = int(1000 * noteOn[idx] * 23/24)
+    #tickEnd = int(1000 * noteOff[idx] * 23/24)
+    #print(noteOn[idx])
+    #tickStart = mido.second2tick(noteOn[idx]/1000, 1, 120)
+    #tickEnd = mido.second2tick(noteOff[idx]/1000, 1, 120)
+    tickStart = int(noteOn[idx]*1000/2.604)
+    tickEnd = int(noteOff[idx]*1000/2.604)
+    track.append(Message('note_on', note=pitch, velocity=64, time=int(tickStart)))
+    track.append(Message('note_off', note=pitch, velocity=127, time=int(tickEnd)))
+
+
+mid.save('output/midi/bass.mid')
