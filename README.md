@@ -6,12 +6,12 @@ Last weeek (1/31 - 2/7):
 1. madmom library, audio => chroma => chord symbol & timestamp => root note & timestamp =90%> midi for bass
 2. install Open-Unmix 0% done (skip it)
 
-meeting discussion\
-- What kind of audio as input? with or without drums?\
-- Genre specific or not? (Metal?)\
-- If this is user-driven using summed track, is it really easy to use except python environment? (genre identification)\
-- Is source seperation necessary?\
-- Tempo?\
+meeting discussion
+- What kind of audio as input? with or without drums?
+- Genre specific or not? (Metal?)
+- If this is user-driven using summed track, is it really easy to use except python environment? (genre identification)
+- Is source seperation necessary?
+- Tempo?
 
 
 To-do:
