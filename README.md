@@ -21,4 +21,8 @@
 4. Look at many genres, find music textbook
 5. Start with onset/drum/tempo...
 
-
+--------------
+**Last weeek (2/8 - 2/14):**
+1. Studio One has very good chord detection and basic bass line generation. It doesn’t consider rhythmic information unless the user write it out.
+  * [Offical documentation] https://s1manual.presonus.com/Content/Arranging_Topics/Chord%20Track.htm
+3. install Open-Unmix 0% done (skip it)
