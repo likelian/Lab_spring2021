@@ -27,4 +27,4 @@
     * [Offical documentation](https://s1manual.presonus.com/Content/Arranging_Topics/Chord%20Track.html)
     * [One YouTube video](https://www.youtube.com/watch?v=flrFapH7RnY)
     * [Another video](https://www.youtube.com/watch?v=A_3CMsyfWqo)
-3. install Open-Unmix 0% done (skip it)
+2. Found a book [Bassist's Bible](http://www.bassistsbible.com/). This book has somehow detailed knowledge about bass patterns in many popular music genres. Metal and Punk have shorter chapters than other genres, so it's easier to implement these two. Some Electronic music genres have simple bass patterns. I can go with that direction if sound design is not part of the project.
