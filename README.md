@@ -21,4 +21,10 @@
 4. Look at many genres, find music textbook
 5. Start with onset/drum/tempo...
 
-
+--------------
+**Last weeek (2/8 - 2/14):**
+1. Studio One has very good chord detection and basic bass line generation. It doesn’t consider rhythmic information unless the user write it out.
+    * [Offical documentation](https://s1manual.presonus.com/Content/Arranging_Topics/Chord%20Track.html)
+    * [One YouTube video](https://www.youtube.com/watch?v=flrFapH7RnY)
+    * [Another video](https://www.youtube.com/watch?v=A_3CMsyfWqo)
+2. Found a book [Bassist's Bible](http://www.bassistsbible.com/). This book has somehow detailed knowledge about bass patterns in many popular music genres. Metal and Punk have shorter chapters than other genres, so it's easier to implement these two. Some Electronic music genres have simple bass patterns. I can go with that direction if sound design is not part of the project.

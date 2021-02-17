@@ -43,7 +43,8 @@ decode = DeepChromaChordRecognitionProcessor()
 #chords = decode(chroma)
 
 chordrec = SequentialProcessor([dcp, decode])
-chords = chordrec('sounds/wawu.wav')
+#chords = chordrec('sounds/wawu.wav')
+chords = chordrec('sounds/Untitled.wav')
 
 np_chords = np.empty((len(chords),3), dtype=object)
 for idx, e in enumerate(chords):
@@ -52,6 +53,10 @@ for idx, e in enumerate(chords):
 np_chords = np_chords.transpose()
 noteOn = np_chords[0]
 noteOff = np_chords[1]
+
+#print(noteOn)
+#noteOn = np.arange(8) * 1000
+#print(noteOn)
 
 RBI = madmom.evaluation.chords.chords(np_chords[2]) # ‘root’, ‘bass’, and ‘intervals’
 
@@ -64,7 +69,7 @@ roots = np_RBI[0]
 
 
 
-mid = MidiFile()
+mid = MidiFile(type=1)
 track = MidiTrack()
 mid.tracks.append(track)
 
@@ -77,10 +82,24 @@ for idx, e in enumerate(roots):
     #print(noteOn[idx])
     #tickStart = mido.second2tick(noteOn[idx]/1000, 1, 120)
     #tickEnd = mido.second2tick(noteOff[idx]/1000, 1, 120)
-    tickStart = int(noteOn[idx]*1000/2.604)
-    tickEnd = int(noteOff[idx]*1000/2.604)
-    track.append(Message('note_on', note=pitch, velocity=64, time=int(tickStart)))
-    track.append(Message('note_off', note=pitch, velocity=127, time=int(tickEnd)))
+    #tickStart = int(noteOn[idx]*1000/2.604)
+    #tickEnd = int(noteOff[idx]*1000/2.604)
+
+
+    #need to find the correct time scale, not too hard
+
+    
+    tickStart = noteOn[idx] * 1000
+    tickEnd = noteOff[idx] * 1000
+    tickEnd = tickEnd - tickStart
+    if idx == 0: pass;
+    else: tickStart = tickStart - noteOn[idx-1] * 1000
+    tickStart = int(tickStart)
+    tickEnd = int(tickEnd)
+
+    #something is wrong with track.append
+    track.append(Message('note_on', note=pitch, velocity=64, time=tickStart))
+    track.append(Message('note_off', note=pitch, velocity=127, time=tickEnd))
 
 
 mid.save('output/midi/bass.mid')
