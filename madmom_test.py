@@ -54,9 +54,6 @@ np_chords = np_chords.transpose()
 noteOn = np_chords[0]
 noteOff = np_chords[1]
 
-#print(noteOn)
-#noteOn = np.arange(8) * 1000
-#print(noteOn)
 
 RBI = madmom.evaluation.chords.chords(np_chords[2]) # ‘root’, ‘bass’, and ‘intervals’
 
@@ -68,36 +65,25 @@ np_RBI = np_RBI.transpose()
 roots = np_RBI[0]
 
 
-
-mid = MidiFile(type=1)
+mid = MidiFile()
 track = MidiTrack()
 mid.tracks.append(track)
 
-
 track.append(Message('program_change', program=33, time=0))
 for idx, e in enumerate(roots):
-    pitch = e + 24
-    #tickStart = int(1000 * noteOn[idx] * 23/24)
-    #tickEnd = int(1000 * noteOff[idx] * 23/24)
-    #print(noteOn[idx])
-    #tickStart = mido.second2tick(noteOn[idx]/1000, 1, 120)
-    #tickEnd = mido.second2tick(noteOff[idx]/1000, 1, 120)
-    #tickStart = int(noteOn[idx]*1000/2.604)
-    #tickEnd = int(noteOff[idx]*1000/2.604)
-
-
-    #need to find the correct time scale, not too hard
-
-    
-    tickStart = noteOn[idx] * 1000
-    tickEnd = noteOff[idx] * 1000
+    pitch = e + 36
+    #tickStart = mido.second2tick(noteOn[idx]/1000, 30, 120)
+    #tickEnd = mido.second2tick(noteOff[idx]/1000, 30, 120)
+    tickStart = noteOn[idx]*125*23/3
+    tickEnd = noteOff[idx]*125*23/3
+    print(tickStart)
+    print(tickEnd)
     tickEnd = tickEnd - tickStart
     if idx == 0: pass;
-    else: tickStart = tickStart - noteOn[idx-1] * 1000
+    else: tickStart = tickStart - noteOff[idx-1]*125*23/3
+    #else: tickStart = tickStart - mido.second2tick(noteOff[idx-1]/1000, 30, 120)
     tickStart = int(tickStart)
     tickEnd = int(tickEnd)
-
-    #something is wrong with track.append
     track.append(Message('note_on', note=pitch, velocity=64, time=tickStart))
     track.append(Message('note_off', note=pitch, velocity=127, time=tickEnd))
 
