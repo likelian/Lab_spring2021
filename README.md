@@ -28,3 +28,25 @@
     * [One YouTube video](https://www.youtube.com/watch?v=flrFapH7RnY)
     * [Another video](https://www.youtube.com/watch?v=A_3CMsyfWqo)
 2. Found a book [Bassist's Bible](http://www.bassistsbible.com/). This book has somehow detailed knowledge about bass patterns in many popular music genres. Metal and Punk have shorter chapters than other genres, so it's easier to implement these two. Some Electronic music genres have simple bass patterns. I can go with that direction if sound design is not part of the project.
+
+
+--------------
+**Last weeek (2/15 - 2/21):**
+1. Tried out onset, beat, and downbeat dectection.
+    * [madmom.features.beats](https://madmom.readthedocs.io/en/latest/modules/features/beats.html)
+    * [madmom.features.beats_crf](https://madmom.readthedocs.io/en/latest/modules/features/beats_crf.html)
+    * [madmom.features.beats_hmm](https://madmom.readthedocs.io/en/latest/modules/features/beats_hmm.html)
+    * [madmom.features.downbeats](https://madmom.readthedocs.io/en/latest/modules/features/downbeats.html)
+    * [madmom.features.tempo](https://madmom.readthedocs.io/en/latest/modules/features/tempo.html)
+2. Onset detection seems to work nicely. For analysizing a full track, threshold around 7 is good. For a track below 150Hz, threshold below 1.
+3. Convert onset locations to midi.
+4. Manually quantize onsets to 16th notes.
+5. Manually join onsets and root notes (a few bars) together. It sounds pretty good.
+
+
+**Next Week (2/22 - 2/28):**
+
+Possible directions:
+1. Drum separation -> drum transcription, replace onset detection
+2. Beat detection -> downbeat detection -> bass pattern based on style
+3. Tempo tracking -> auto quantization

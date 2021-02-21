@@ -6,6 +6,7 @@ from madmom.features.chords import DeepChromaChordRecognitionProcessor
 from madmom.processors import SequentialProcessor
 import mido
 from mido import Message, MidiFile, MidiTrack
+from scipy import signal
 
 """
 https://github.com/CPJKU/madmom_tutorials/blob/master/audio_signal_handling.ipynb
@@ -35,6 +36,10 @@ https://mido.readthedocs.io/en/latest/midi_files.html
 #spec.shape, spec.bin_frequencies
 #spec.stft.frames.overlap_factor
 
+
+"""
+root note to midi
+"""
 
 #madmom.audio.chroma.DeepChromaProcessor(fmin=65, fmax=2100, unique_filters=True, models=None, **kwargs)
 dcp = madmom.audio.chroma.DeepChromaProcessor()
@@ -72,20 +77,88 @@ mid.tracks.append(track)
 track.append(Message('program_change', program=33, time=0))
 for idx, e in enumerate(roots):
     pitch = e + 36
-    #tickStart = mido.second2tick(noteOn[idx]/1000, 30, 120)
-    #tickEnd = mido.second2tick(noteOff[idx]/1000, 30, 120)
     tickStart = noteOn[idx]*125*23/3
     tickEnd = noteOff[idx]*125*23/3
-    print(tickStart)
-    print(tickEnd)
     tickEnd = tickEnd - tickStart
     if idx == 0: pass;
     else: tickStart = tickStart - noteOff[idx-1]*125*23/3
-    #else: tickStart = tickStart - mido.second2tick(noteOff[idx-1]/1000, 30, 120)
     tickStart = int(tickStart)
     tickEnd = int(tickEnd)
     track.append(Message('note_on', note=pitch, velocity=64, time=tickStart))
     track.append(Message('note_off', note=pitch, velocity=127, time=tickEnd))
 
+mid.save('output/midi/root.mid')
 
-mid.save('output/midi/bass.mid')
+
+
+"""
+onset
+"""
+
+#log_filt_spec = madmom.audio.spectrogram.LogarithmicFilteredSpectrogram('sounds/Untitled.wav', num_bands=24)
+log_filt_spec = madmom.audio.spectrogram.LogarithmicFilteredSpectrogram('sounds/Untitled_bass(filtered).wav', num_bands=24)
+superflux_3 = madmom.features.onsets.superflux(log_filt_spec)
+#proc = madmom.features.onsets.OnsetPeakPickingProcessor(fps=100, threshold=7, combine=0.25) #threshold!!!!!!
+proc = madmom.features.onsets.OnsetPeakPickingProcessor(fps=100, threshold=0.7, combine=0.2) #threshold!!!!!!
+onset = proc(superflux_3)
+
+
+
+#print(superflux_3)
+#plt.plot(superflux_3 / superflux_3.max())  # dotted black
+#plt.show()
+
+
+mid = MidiFile()
+track = MidiTrack()
+mid.tracks.append(track)
+
+track.append(Message('program_change', program=33, time=0))
+for idx, e in enumerate(onset):
+    pitch = 48
+    tickStart = onset[idx]*125*23/3
+    #if idx >= len(onset)-1: idx -= 1
+    #tickEnd = onset[idx+1]*125*23/3
+    tickEnd = 20
+    #tickEnd = tickEnd - tickStart
+    if idx == 0: pass;
+    else: tickStart = tickStart - onset[idx-1]*125*23/3 - tickEnd
+    tickStart = int(tickStart)
+    tickEnd = int(tickEnd)
+    track.append(Message('note_on', note=pitch, velocity=64, time=tickStart))
+    track.append(Message('note_off', note=pitch, velocity=127, time=tickEnd))
+
+mid.save('output/midi/onset.mid')
+
+
+
+
+
+"""
+beat, very slow...
+"""
+
+"""
+from madmom.models import BEATS_LSTM
+
+act = madmom.features.beats.RNNBeatProcessor()('sounds/Untitled.wav')
+proc = madmom.features.beats.DBNBeatTrackingProcessor(fps=100)
+beat = proc(act)
+"""
+
+
+
+
+
+
+"""
+downbeat
+"""
+
+"""
+#have to give 3/4, 4/4......
+proc = madmom.features.beats.DBNDownBeatTrackingProcessor(beats_per_bar=[4, 4], fps=100)
+act = madmom.features.beats.RNNDownBeatProcessor()('sounds/Untitled.wav')
+downbeat = proc(act)
+print(downbeat)
+"""
