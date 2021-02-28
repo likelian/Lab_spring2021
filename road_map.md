@@ -1,7 +1,10 @@
 # Road Map
 
 #### What does it do?
-The system uses several features (tempo, genre, structure) to decide on what information and how much of each that the bass guitar algorithm is leaning on (bass drum onset, accompanied tracks' onset, beat, downbeat, programmed patterns, chord detection, lead melody, bass melody).
+The system uses audio features to generate bass guitar midi, including what to generate and the choices of algorithms and parameters.
+
+
+In particular, the data for the generation includes bass drum onset, accompanied tracks' onset, beat, downbeat, pre-programmed patterns, chord detection, lead melody, and bass melody. Other features (tempo, genre, structure) help to decide on how much of the data from each category the algorithm is leaning on.
 
 #### How to do it?
 
