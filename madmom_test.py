@@ -132,19 +132,131 @@ mid.save('output/midi/onset.mid')
 
 
 
-
-
 """
-beat, very slow...
-"""
+#######1     DBN approximated by a HMM      ########
 
-"""
 from madmom.models import BEATS_LSTM
 
 act = madmom.features.beats.RNNBeatProcessor()('sounds/Untitled.wav')
 proc = madmom.features.beats.DBNBeatTrackingProcessor(fps=100)
 beat = proc(act)
+#print(beat)
 """
+
+
+"""
+#######2   CRFBeatDetector     ########
+
+from madmom.models import BEATS_LSTM
+from madmom.features.beats_crf import best_sequence
+
+act = madmom.features.beats.RNNBeatProcessor()('sounds/Untitled.wav')
+#print(act)
+beat = madmom.features.beats_crf.best_sequence(act, 100, 1)[0] / 100
+#print(beat)
+"""
+
+"""
+########3     Constant Tempo is assumed       ########
+
+from madmom.features.beats import BeatDetectionProcessor, RNNBeatProcessor
+
+
+proc = BeatDetectionProcessor(fps=100)
+act = RNNBeatProcessor()('sounds/Untitled.wav')
+beat = proc(act)
+"""
+
+
+
+"""
+
+from madmom.features.beats_hmm import BeatStateSpace
+
+act = madmom.features.beats.RNNBeatProcessor()('sounds/Untitled.wav')
+proc = madmom.features.beats_hmm.BeatStateSpace(60, 360)
+beat = proc(act)
+
+"""
+
+"""
+#######   aubio     ########
+
+import aubio
+import numpy as np
+
+
+src = aubio.source('sounds/Untitled.wav')
+
+a_tempo = aubio.tempo(method="default", buf_size=1024, hop_size=512, samplerate=44100)
+
+total_frames = 0
+beat = []
+while True:
+        samples, read = src()
+        is_beat = a_tempo(samples)
+        if is_beat:
+            this_beat = a_tempo.get_last_s()
+            beat.append(this_beat)
+            #if o.get_confidence() > .2 and len(beats) > 2.:
+            #    break
+        total_frames += read
+        if read < 512:
+            break
+
+#print(beat)
+"""
+
+
+"""
+Evaluation of beat detection
+"""
+
+#"""
+
+#beat = beat[:-1] #remove the one extra
+
+
+#True_beat = np.arange(288.0) / 2
+#True_beat = np.arange(144.0) + 1
+#True_beat = (np.arange(288.0) + 1) / 2
+True_beat = np.arange(288.0)[4:] / 2
+
+#print(True_beat)
+
+print(beat)
+print(True_beat)
+error_arr = beat - True_beat
+F_score = np.count_nonzero( error_arr < 0.07) / len(error_arr)
+mean_error = np.mean(error_arr)
+print(F_score)
+print(mean_error)
+
+#"""
+
+
+
+mid = MidiFile()
+track = MidiTrack()
+mid.tracks.append(track)
+
+track.append(Message('program_change', program=33, time=0))
+for idx, e in enumerate(beat):
+    pitch = 36
+    tickStart = beat[idx]*125*23/3
+    #if idx >= len(onset)-1: idx -= 1
+    #tickEnd = onset[idx+1]*125*23/3
+    tickEnd = 10
+    #tickEnd = tickEnd - tickStart
+    if idx == 0: pass;
+    else: tickStart = tickStart - beat[idx-1]*125*23/3 - tickEnd
+    tickStart = int(tickStart)
+    tickEnd = int(tickEnd)
+    track.append(Message('note_on', note=pitch, velocity=64, time=tickStart))
+    track.append(Message('note_off', note=pitch, velocity=127, time=tickEnd))
+
+mid.save('output/midi/beat.mid')
+
 
 
 

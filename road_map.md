@@ -8,24 +8,21 @@ In particular, the data for the generation includes bass drum onset, accompanied
 
 #### How to do it?
 
-1. Quantize chord detection with beat detection
-2. **Map the onset midi to root note midi**
-3. Decide if the beat detection and tempo tracking can improve the onset position (can wait after drum transcription)
-4. **Create a simple bass pattern and apply it to the beat detection, output bass pattern midi**
-5. **Find a way to morph between the onset midi and the programed pattern midi**
-6. **Add tempo into the consideration (long note for ballads)**
-7. Try genre classification, and take a few genres into the consideration
-8. Try source separation
-9. Try drum transcription
-10. Redo the chord detection without drums
-11. Redo the onset detection without drums
-12. (Bass transcription and lead transcription if possible)
-13. Stable the performance in one song, replace small variations with repetitions
-14. Try structure identification
-15. Add more programmed bass patterns
-16. Stable the performance in one section
-17. Create a simple GUI for audio input and midi output
-18. Add controls in GUI (quantization, complexity..)
+1. Examine if quantizing the chord detection with beat detection is still meaningful
+2.  **Map the onset midi to root note midi**
+3. find the note/beat ratio data, or extract such data from MIDI datasets, regarding to some specific genre
+4. An algorithm that uses note/beat ratio to tune the parameter in onset detection
+5. Implement genre classification
+6. Assist the above algorithm with genre classification
+7. Source separation
+8. Drum transcription
+9. Redo the chord detection without drums
+10. Redo the onset detection without drums
+11. Add tempo into the consideration of note duration
+    1. find existing data
+    2. apply the extracted data to the algorithm
+12. (Structure identification)
+13. User study
 
 
 
@@ -57,7 +54,7 @@ In particular, the data for the generation includes bass drum onset, accompanied
 
 ...
 
-### Efficiency test 
+### Efficiency test
 Since this is assisted music genreation, we can compare the efficiency imporvement it provides. Within the given amount of time of music making, compare the final results of the bass guitar parts from subjective listening. In one group, composers start with the audio and the midi parts generated from the tool (adding the time using the tool). In the other group, composers can start with midi transcription? (studio one?).
 
 
