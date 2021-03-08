@@ -209,10 +209,9 @@ while True:
 
 
 """
-Evaluation of beat detection
-"""
+##################Evaluation of beat detection
 
-#"""
+
 
 #beat = beat[:-1] #remove the one extra
 
@@ -232,9 +231,11 @@ mean_error = np.mean(error_arr)
 print(F_score)
 print(mean_error)
 
-#"""
+"""
 
 
+"""
+########## beat midi output ##################
 
 mid = MidiFile()
 track = MidiTrack()
@@ -257,8 +258,7 @@ for idx, e in enumerate(beat):
 
 mid.save('output/midi/beat.mid')
 
-
-
+"""
 
 
 
