@@ -50,3 +50,36 @@ Possible directions:
 1. Drum separation -> drum transcription, replace onset detection
 2. Beat detection -> downbeat detection -> bass pattern based on style
 3. Tempo tracking -> auto quantization
+
+--------------
+**Last weeek (2/22 - 2/28):**
+1. Worked on beat detection. The result is not as accurate as expected.
+
+**Meeting**
+1. A plan is needed
+2. Test on the beat detection
+3. Evaluation method for this project
+
+
+**Next Week (2/28 - 3/7):**
+
+1. A plan
+2. Test on the beat detection
+3. Evaluation method
+
+
+--------------
+**Last weeek (2/28 - 3/7):**
+1. Tested and evaluated different beat detection algorthms
+2. in this project, beat detection only works when a constant tempo is assumed, and the audio is edited
+
+**Meeting**
+1. Structure identification combined, not a good idea
+2. Note density idea is good, more than note/tempo ratio? More evidence to support this idea
+
+
+**Next Week (3/7 - 3/14):**
+1. Build a baseline this week, root + onset
+2. Export 10 generated pieces, several genres
+3. Think a bigger plan that is not limited by the current technology
+4. Find a path to the plan
