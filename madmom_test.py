@@ -37,6 +37,9 @@ https://mido.readthedocs.io/en/latest/midi_files.html
 #spec.stft.frames.overlap_factor
 
 
+filename = input('Enter the filename :')
+#sig = madmom.io.audio.load_wave_file(filename, num_channels=1)
+
 """
 root note to midi
 """
@@ -49,7 +52,7 @@ decode = DeepChromaChordRecognitionProcessor()
 
 chordrec = SequentialProcessor([dcp, decode])
 #chords = chordrec('sounds/wawu.wav')
-chords = chordrec('sounds/Untitled.wav')
+chords = chordrec(filename)
 
 np_chords = np.empty((len(chords),3), dtype=object)
 for idx, e in enumerate(chords):
@@ -95,11 +98,11 @@ mid.save('output/midi/root.mid')
 onset
 """
 
-#log_filt_spec = madmom.audio.spectrogram.LogarithmicFilteredSpectrogram('sounds/Untitled.wav', num_bands=24)
-log_filt_spec = madmom.audio.spectrogram.LogarithmicFilteredSpectrogram('sounds/Untitled_bass(filtered).wav', num_bands=24)
+log_filt_spec = madmom.audio.spectrogram.LogarithmicFilteredSpectrogram(filename, num_bands=24)
+#log_filt_spec = madmom.audio.spectrogram.LogarithmicFilteredSpectrogram('sounds/Untitled_bass(filtered).wav', num_bands=24)
 superflux_3 = madmom.features.onsets.superflux(log_filt_spec)
-#proc = madmom.features.onsets.OnsetPeakPickingProcessor(fps=100, threshold=7, combine=0.25) #threshold!!!!!!
-proc = madmom.features.onsets.OnsetPeakPickingProcessor(fps=100, threshold=0.7, combine=0.2) #threshold!!!!!!
+proc = madmom.features.onsets.OnsetPeakPickingProcessor(fps=100, threshold=6, combine=0.15) #threshold!!!!!!
+#proc = madmom.features.onsets.OnsetPeakPickingProcessor(fps=100, threshold=0.7, combine=0.2) #threshold!!!!!!
 onset = proc(superflux_3)
 
 
@@ -116,19 +119,60 @@ mid.tracks.append(track)
 track.append(Message('program_change', program=33, time=0))
 for idx, e in enumerate(onset):
     pitch = 48
-    tickStart = onset[idx]*125*23/3
+    tickStart = onset[idx]*125.4*23/3
     #if idx >= len(onset)-1: idx -= 1
     #tickEnd = onset[idx+1]*125*23/3
     tickEnd = 20
     #tickEnd = tickEnd - tickStart
     if idx == 0: pass;
-    else: tickStart = tickStart - onset[idx-1]*125*23/3 - tickEnd
+    else: tickStart = tickStart - onset[idx-1]*125.4*23/3 - tickEnd
     tickStart = int(tickStart)
     tickEnd = int(tickEnd)
     track.append(Message('note_on', note=pitch, velocity=64, time=tickStart))
     track.append(Message('note_off', note=pitch, velocity=127, time=tickEnd))
 
 mid.save('output/midi/onset.mid')
+
+
+
+
+
+
+"""
+Baseline system
+Root + Onset
+"""
+
+mid = MidiFile()
+track = MidiTrack()
+mid.tracks.append(track)
+
+track.append(Message('program_change', program=33, time=0))
+for idx, e in enumerate(onset):
+
+
+    tickStart = onset[idx]*125.4*23/3
+    tickEnd = 150
+
+    note_idx = np.searchsorted(noteOn, onset[idx])
+
+    pitch = roots[note_idx-1]
+    if pitch == -1: pitch += 12
+    elif 0 <= pitch <= 4: pitch += 48
+    else: pitch += 36
+
+
+    if idx == 0: pass;
+    else: tickStart = tickStart - onset[idx-1]*125.4*23/3 - tickEnd
+    tickStart = int(tickStart)
+    tickEnd = int(tickEnd)
+    track.append(Message('note_on', note=pitch, velocity=64, time=tickStart))
+    track.append(Message('note_off', note=pitch, velocity=127, time=tickEnd))
+
+mid.save('output/midi/baseline.mid')
+
+
+
 
 
 
