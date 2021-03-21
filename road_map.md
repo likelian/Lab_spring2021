@@ -4,26 +4,11 @@
 
 
 
-#### What does it do?
-The system uses audio features to generate bass guitar midi, including what to generate and the choices of algorithms and parameters.
-
->audio => tempo estimation, genre classification, beat/downbeat detection, dynamic range, loudness contour, (structure identification)
->
->audio => source separation => onset detection, chord detection
 
 
-| Melody |Onset  |~~Duration~~  |Velocity  |
-| --- | --- | --- | --- |
-|downbeat on root | <u>**density by genre**</u>  | <u>**genre**</u>  |beat and downbeat  |
-|passing tones  | density by tempo  | <u>**tempo**</u> |**<u>loudness</u>**  |
-|grace notes  |density by complexity/loudness   |complexity  |complexity  |
-|5th&8th  |density by dynamic range  | <u>**loudness**</u> |  |
-|**voicing from spectral analysis**  |quantization from tempo (ignore outliners)  |  |
-|**follow the bass/lead note** | **follow the drums or others** ||
 
-#### Advanced Functionalities:
 
-##### How to define the complexity(tension) to note density, ~~duration~~, velocity?
+#### How to define the complexity(tension) to note density, ~~duration~~, velocity?
 
 
 I can’t find anything about note duration. So I will simply extend the note duration to the start of next note, or the change in harmony.
@@ -31,15 +16,17 @@ I can’t find anything about note duration. So I will simply extend the note du
 According to the following, <u>**velocity and note density is positively correlated to the tension level.**</u>
 
 >"The tension levels tended to increase within segments, with accompanying increases in dynamics and note density."
+>
 >Krumhansl, Carol L. "Music: A link between cognition and emotion." Current directions in psychological science 11, no. 2 (2002): 45-50.
 
 >"However, the design of the arrangement also implies control of a number of musical aspects on a global scale. These can be summarized in a tension curve, that includes aspects ⇐= such as melodic curves (high and low points), harmonic consonance and dissonance, dynamics (soft-loud), orchestration (instrumentation, register, special playing techniques and effects) and part density (between unisono and tutti). The total duration of the arrangement follows from the tempo."
+>
 >p.207
->https://www.fransabsil.nl/archpdf/arrbook.pdf
+>[https://www.fransabsil.nl/archpdf/arrbook.pdf](https://www.fransabsil.nl/archpdf/arrbook.pdf)
 
 
 
-##### How to create the approximated tension contour?
+#### How to create the approximated tension contour?
 
 1. Initial the tension value.
 2. Analyze the LUFS of the input audio.
@@ -63,9 +50,26 @@ According to the following, <u>**velocity and note density is positively correla
 * Automatic voicing to avoid spectral masking
 
 
-https://www.musicianonamission.com/how-to-write-a-bassline/
+[https://www.musicianonamission.com/how-to-write-a-bassline/](https://www.musicianonamission.com/how-to-write-a-bassline/)
 
 
+
+#### What does it do?
+The system uses audio features to generate bass guitar midi, including what to generate and the choices of algorithms and parameters.
+
+>audio => tempo estimation, genre classification, beat/downbeat detection, dynamic range, loudness contour, (structure identification)
+>
+>audio => source separation => onset detection, chord detection
+
+
+| Melody |Onset  |~~Duration~~  |Velocity  |
+| --- | --- | --- | --- |
+|downbeat on root | <u>**density by genre**</u>  | <u>**genre**</u>  |beat and downbeat  |
+|passing tones  | density by tempo  | <u>**tempo**</u> |**<u>loudness</u>**  |
+|grace notes  |density by complexity/loudness   |complexity  |complexity  |
+|5th&8th  |density by dynamic range  | <u>**loudness**</u> |  |
+|**voicing from spectral analysis**  |quantization from tempo (ignore outliners)  |  |
+|**follow the bass/lead note** | **follow the drums or others** ||
 
 
 # Evaluation
