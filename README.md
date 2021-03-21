@@ -83,3 +83,35 @@ Possible directions:
 2. Export 10 generated pieces, several genres
 3. Think a bigger plan that is not limited by the current technology
 4. Find a path to the plan
+
+
+--------------
+**Last weeek (3/7 - 3/14):**
+1. Built the baseline system
+2. Test on ten songs
+    * Good: Blues, Country, Hiphop, Electronic, Pop
+    * Bad: Metal and Rock due to the small dynamic range; Reggae due to the short chord length
+
+**Meeting**
+1. Variation reduction needs more explanation
+2. based on what evidence you derive your definition of complexity, why your definition is not arbitrary, and why your definition is more fitting than possible alternative ways of defining complexity, and
+3. how you actually plan to model/approximate this complexity algorithmically and how you verify that your model fits the definition.
+4. Melody??
+
+
+**Next Week (3/15 - 3/21):**
+1. Melody ideas
+2. Evidence of complexity mapping
+3. Plan for complexity approximation
+4. Source separation
+
+
+--------------
+**Last weeek (3/21 - 3/28):**
+1. Found a midi [dataset](freemidi.org)
+    * Labelled genres on webpage: Rock, Pop, Hip-Hop, R&B Soul, ~~Classical~~, Country, Folk, Jazz, Blues, Dance/Electric, Folk, Punk, ~~Newage~~
+    * Many have constant velocity
+    * Tempo and time signature inherited in midi files
+
+
+**Meeting**
