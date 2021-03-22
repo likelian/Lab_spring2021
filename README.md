@@ -112,6 +112,8 @@ Possible directions:
     * Labelled genres on webpage: Rock, Pop, Hip-Hop, R&B Soul, ~~Classical~~, Country, Folk, Jazz, Blues, Dance/Electric, Folk, Punk, ~~Newage~~
     * Many have constant velocity
     * Tempo and time signature inherited in midi files
+2. Installed [Open-unmix](https://sigsep.github.io/open-unmix/#using-the-pytorch-version)
+3. Found some literature about note density and velocity
 
 
 **Meeting**
