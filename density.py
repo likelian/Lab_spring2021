@@ -8,6 +8,8 @@ import mido
 from mido import Message, MidiFile, MidiTrack
 from scipy import signal
 
+
+
 """
 https://github.com/CPJKU/madmom_tutorials/blob/master/audio_signal_handling.ipynb
 
@@ -39,6 +41,23 @@ https://mido.readthedocs.io/en/latest/midi_files.html
 
 filename = input('Enter the filename :')
 #sig = madmom.io.audio.load_wave_file(filename, num_channels=1)
+
+
+"""
+Structure analysis
+"""
+
+"""
+import librosa
+import msaf
+import IPython.display
+
+
+boundaries, labels = msaf.process(filename)
+print(boundaries)
+
+"""
+
 
 """
 root note to midi
@@ -139,11 +158,12 @@ step = 0.1
 targeted_note_density = 1.5
 density_threshold = 0.1
 note_density = 0
-count = 0
+count = 2000
 if abs(note_density - targeted_note_density) <= density_threshold: density_threshold = targeted_note_density*0.5
 
 while abs(note_density - targeted_note_density) > density_threshold:
     count += 1
+    if count >= 2000: print("note density iterated over 2000"); break
     difference = note_density - targeted_note_density
     #if difference < 1: step *= 5
     onset_threshold += step * difference

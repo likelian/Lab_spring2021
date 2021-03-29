@@ -107,7 +107,7 @@ Possible directions:
 
 
 --------------
-**Last weeek (3/21 - 3/28):**
+**Last weeek (3/15 - 3/21):**
 1. Found a midi [dataset](freemidi.org)
     * Labelled genres on webpage: Rock, Pop, Hip-Hop, R&B Soul, ~~Classical~~, Country, Folk, Jazz, Blues, Dance/Electric, Folk, Punk, ~~Newage~~
     * Many have constant velocity
@@ -117,3 +117,30 @@ Possible directions:
 
 
 **Meeting**
+1. Randomess no good
+2. Key detection needed for passing notes
+3. What is the distance between root notes
+4. Stylistic selection?
+5. A list of priority
+6. A schedule
+
+
+**Next Week (3/21 - 3/28):**
+1. A list of priority
+2. A schedule
+
+
+--------------
+**Last weeek (3/21 - 3/28):**
+1. Implemented the basic note density search algorithm
+2. Improve the note duration so it matches the next note
+3. Came up with a schedule
+
+**Meeting**
+1. Make sure the algorithm converge
+2. Understand loudness metrics
+
+
+**Next Week (3/21 - 3/28):**
+1. Implement structure idenntification
+2. Implement loudness analysis

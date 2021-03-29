@@ -39,6 +39,29 @@ According to the following, <u>**velocity and note density is positively correla
 
 
 
+
+User controlled music generation takes the priority over the passing notes implementation.
+
+# Schedule
+
+3/21 - 3/28
+Implement the basic optimization algorithm that finds the parameters of the onset detection given any note density values.
+
+3/29 - 4/4
+Implement structure identification and loudness analysis. Compute the sectional loudness difference.
+
+4/5 - 4/11
+Develope a graphic interface that allows user control of the music generation. Integrate the incomplete tension approximation algorithm(genre not involoved).
+
+4/12 - 4/18
+Pull midi data and the genre label from the internet, and analysis the note density of the bass guitar in each genre.
+
+4/19 - 4/25
+Implement genre classification, and integrate it to the tension approximation in the graphic interface.
+
+4/27
+Presentation
+
 #### Melody:
 * Jumps in the bassline
     * possible **fifth** and **octave**, not on the first note in a chord, and back to the root note after the fifth or the octave
@@ -70,7 +93,6 @@ The system uses audio features to generate bass guitar midi, including what to g
 |5th&8th  |density by dynamic range  | <u>**loudness**</u> |  |
 |**voicing from spectral analysis**  |quantization from tempo (ignore outliners)  |  |
 |**follow the bass/lead note** | **follow the drums or others** ||
-
 
 # Evaluation
 
@@ -120,7 +142,7 @@ Since this is assisted music genreation, we can compare the efficiency imporveme
 
 
 
->#### How to do it?
+>#### ~~How to do it?~~
 >
 >1. Examine if quantizing the chord detection with beat detection is still meaningful
 >2.  **Map the onset midi to root note midi**
