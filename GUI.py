@@ -3,6 +3,7 @@ import random
 from PySide6 import QtCore, QtWidgets, QtGui
 #from Bass import root2midi
 import Bass
+#from Bass import *
 
 
 class MyWidget(QtWidgets.QWidget):
@@ -31,7 +32,9 @@ class MyWidget(QtWidgets.QWidget):
     def load_file(self):
         self.audio_file = str(QtWidgets.QFileDialog.getOpenFileName(self)[0])
         self.text.setText(self.audio_file)
-        Bass.root2midi(self.audio_file)
+        
+        Bassline = Bass.Bass(self.audio_file)
+        Bassline.root_onset()
 
     def get_FileName(self):
         return self.audio_file

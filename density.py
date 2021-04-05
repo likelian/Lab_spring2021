@@ -52,18 +52,17 @@ import librosa
 import msaf
 #import IPython.display
 
-
 #boundaries, labels = msaf.process(filename)
 
 #audio_file = "msaf-data-master/Sargon/audio/01-Sargon-Mindless.wav"
 audio_file = filename
 
-sr = 44100
+#sr = 44100
 
 #print(msaf.get_all_boundary_algorithms())
 
 #boundaries, labels = msaf.process(filename, sonify_bounds=True, out_bounds=filename, out_sr=sr)
-sonified_file = "my_boundaries.wav"
+#sonified_file = "my_boundaries.wav"
 #boundaries, labels = msaf.process(audio_file)
 #boundaries, labels = msaf.process(audio_file, sonify_bounds=True,
 #                                    out_bounds=sonified_file, out_sr=sr)
@@ -73,12 +72,9 @@ boundaries, labels = msaf.process(audio_file, feature="cqt", boundaries_id="sf")
 print(boundaries)
 #print(labels)
 
-
 #evaluations = msaf.eval.process(audio_file, boundaries_id="foote", labels_id="fmc2d")
 #print(evaluations)
 #IPython.display.display(evaluations)
-
-
 
 
 #ds_path = "msaf-data-master/Sargon"
@@ -86,7 +82,6 @@ print(boundaries)
 #evals = msaf.eval.process(ds_path)
 #evals.to_csv(index=False)
 #print(evals)
-
 
 
 """
