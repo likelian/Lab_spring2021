@@ -47,16 +47,74 @@ filename = input('Enter the filename :')
 Structure analysis
 """
 
-"""
+
 import librosa
 import msaf
-import IPython.display
+#import IPython.display
 
 
-boundaries, labels = msaf.process(filename)
+#boundaries, labels = msaf.process(filename)
+
+#audio_file = "msaf-data-master/Sargon/audio/01-Sargon-Mindless.wav"
+audio_file = filename
+
+sr = 44100
+
+#print(msaf.get_all_boundary_algorithms())
+
+#boundaries, labels = msaf.process(filename, sonify_bounds=True, out_bounds=filename, out_sr=sr)
+sonified_file = "my_boundaries.wav"
+#boundaries, labels = msaf.process(audio_file)
+#boundaries, labels = msaf.process(audio_file, sonify_bounds=True,
+#                                    out_bounds=sonified_file, out_sr=sr)
+
+#print(msaf.features_registry)
+boundaries, labels = msaf.process(audio_file, feature="cqt", boundaries_id="sf")
 print(boundaries)
+#print(labels)
+
+
+#evaluations = msaf.eval.process(audio_file, boundaries_id="foote", labels_id="fmc2d")
+#print(evaluations)
+#IPython.display.display(evaluations)
+
+
+
+
+#ds_path = "msaf-data-master/Sargon"
+#results = msaf.process(ds_path)
+#evals = msaf.eval.process(ds_path)
+#evals.to_csv(index=False)
+#print(evals)
+
+
 
 """
+Loudness
+
+LUFS
+"""
+
+import soundfile as sf
+import pyloudnorm as pyln
+
+data, rate = sf.read(filename) # load audio (with shape (samples, channels))
+meter = pyln.Meter(rate) # create BS.1770 meter
+Program_loudness = meter.integrated_loudness(data) # measure loudness
+sec_loudness = []
+print("Program_loudness", Program_loudness)
+for sec_idx in range(len(boundaries)-1):
+    sec_data = data[int(boundaries[sec_idx]*rate):int(boundaries[sec_idx+1]*rate)-1]
+    if len(sec_data) < rate:
+        loudness = -60
+    else:
+        loudness = meter.integrated_loudness(sec_data) # measure loudness
+    sec_loudness.append(loudness - Program_loudness)
+    print("sec_loudness", loudness - Program_loudness)
+
+
+
+
 
 
 """
@@ -158,12 +216,12 @@ step = 0.1
 targeted_note_density = 1.5
 density_threshold = 0.1
 note_density = 0
-count = 2000
+count = 0
 if abs(note_density - targeted_note_density) <= density_threshold: density_threshold = targeted_note_density*0.5
 
 while abs(note_density - targeted_note_density) > density_threshold:
     count += 1
-    if count >= 2000: print("note density iterated over 2000"); break
+    if count >= 2000: print("note density iterated over 2000"); break;
     difference = note_density - targeted_note_density
     #if difference < 1: step *= 5
     onset_threshold += step * difference
