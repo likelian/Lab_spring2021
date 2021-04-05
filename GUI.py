@@ -1,6 +1,8 @@
 import sys
 import random
 from PySide6 import QtCore, QtWidgets, QtGui
+#from Bass import root2midi
+import Bass
 
 
 class MyWidget(QtWidgets.QWidget):
@@ -27,9 +29,13 @@ class MyWidget(QtWidgets.QWidget):
 
     @QtCore.Slot()
     def load_file(self):
+        self.audio_file = str(QtWidgets.QFileDialog.getOpenFileName(self)[0])
+        self.text.setText(self.audio_file)
+        Bass.root2midi(self.audio_file)
 
-        self._audio_file = str(QtWidgets.QFileDialog.getOpenFileName(self)[0])
-        self.text.setText(self._audio_file)
+    def get_FileName(self):
+        return self.audio_file
+
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication([])
@@ -37,5 +43,6 @@ if __name__ == "__main__":
     widget = MyWidget()
     widget.resize(800, 600)
     widget.show()
+
 
     sys.exit(app.exec_())

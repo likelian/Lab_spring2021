@@ -141,6 +141,22 @@ Possible directions:
 2. Understand loudness metrics
 
 
-**Next Week (3/21 - 3/28):**
+**Next Week (3/28 - 4/4):**
 1. Implement structure idenntification
 2. Implement loudness analysis
+
+
+
+--------------
+**Last weeek (3/28 - 4/4):**
+1. Integrated structure idenntification, no proper evaluation
+2.Implemented LUFS for each section
+
+**Meeting**
+1. no evaluation is fine
+2. DBa???
+3. Is the library reliable?
+
+**Next Week (4/4 - 4/11):**
+1. GUI
+2. Real-time playing
