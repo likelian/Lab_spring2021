@@ -14,6 +14,7 @@ import msaf
 import soundfile as sf
 import pyloudnorm as pyln
 import aubio
+import random
 
 
 ################################################################################
@@ -82,7 +83,7 @@ class Bass(object):
         Structure analysis
         """
 
-        boundaries, labels = msaf.process(self.filename, feature="cqt", boundaries_id="sf")
+        boundaries, labels = msaf.process(self.filename, feature="mfcc", boundaries_id="sf")
         return boundaries
 
 
@@ -227,7 +228,7 @@ class Bass(object):
             note_idx = np.searchsorted(noteOn, onset[idx])
 
             pitch = roots[note_idx-1]
-            vel = 64
+            vel = 64 + random.randint(-5, 5)
             if pitch == -1: pitch += 12; vel = 0
             elif 0 <= pitch <= 4: pitch += 36
             else: pitch += 24

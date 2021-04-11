@@ -30,20 +30,19 @@ class MyWidget(QtWidgets.QWidget):
         self.button2 = QtWidgets.QPushButton("Play")
         self.button3 = QtWidgets.QPushButton("Pause")
         #self.button4 = QtWidgets.QPushButton("Play_midi")
-
         self.gain_dial = QtWidgets.QDial()
-        self.text = QtWidgets.QLabel("Hello World",
-                                     alignment=QtCore.Qt.AlignCenter)
+        #self.text = QtWidgets.QLabel("",
+        #                             alignment=QtCore.Qt.AlignCenter)
 
 
-
-        self.layout = QtWidgets.QVBoxLayout(self)
-        self.layout.addWidget(self.text)
-        self.layout.addWidget(self.button1)
-        self.layout.addWidget(self.button2)
-        self.layout.addWidget(self.button3)
+        self.layout = QtWidgets.QGridLayout(self)
+        #self.layout.addWidget(self.text)
+        self.layout.addWidget(self.button1, 0, 0, 1, 2)
+        self.layout.addWidget(self.button2, 1, 0)
+        self.layout.addWidget(self.button3, 1, 1)
         #self.layout.addWidget(self.button4)
-        self.layout.addWidget(self.gain_dial)
+        #self.layout.addWidget(self.gain_dial, 4, 0)
+
 
         self.button1.clicked.connect(self.load_file)
         self.button2.clicked.connect(self.play_audio)
@@ -59,7 +58,7 @@ class MyWidget(QtWidgets.QWidget):
 
     def load_file(self):
         self.audio_file = str(QtWidgets.QFileDialog.getOpenFileName(self)[0])
-        self.text.setText(self.audio_file)
+        #self.text.setText(self.audio_file)
         self.wf = wave.open(self.audio_file, 'rb')
         self.buffer, self.fs = sf.read(self.audio_file)
 
@@ -68,7 +67,7 @@ class MyWidget(QtWidgets.QWidget):
             #global self.gain
             data = self.wf.readframes(frame_count)
             in_data_nda = np.frombuffer(data, dtype=np.int16)
-            output = in_data_nda * self.gain * 0.2
+            output = in_data_nda * self.gain * 0.5
             output = output.astype(np.int16)
 
             return output, pyaudio.paContinue
@@ -82,15 +81,42 @@ class MyWidget(QtWidgets.QWidget):
         self.stream.stop_stream()
 
         # generate the plot
-        fig = Figure(figsize=(600,600), dpi=72, facecolor=(1,1,1), edgecolor=(0,0,0))
+        fig = Figure(figsize=(600,200), dpi=72, facecolor=(1,1,1), edgecolor=(0,0,0))
         ax = fig.add_subplot(111)
-        ax.plot(self.buffer)
-        # generate the canvas to display the plot
-        canvas = FigureCanvas(fig)
-        self.layout.addWidget(canvas)
+        time = np.linspace(0, len(self.buffer) / self.fs, num = len(self.buffer))
+        ax.plot(time, self.buffer)
+
+
 
         Bassline = Bass.Bass(self.audio_file)
+
+        boundaries = Bassline.structure()
+        boundaries_labels = np.empty(len(self.buffer))
+        boundaries_labels[:] = np.nan
+        for i in boundaries[1:-1]:
+            boundaries_labels[int(i*self.fs)-1] = 1
+            boundaries_labels[int(i*self.fs)-2] = -1
+        ax.plot(time, boundaries_labels)
+        # generate the canvas to display the plot
+        canvas = FigureCanvas(fig)
+        self.layout.addWidget(canvas, 2, 0, 1, 2)
+
+        self.slider1 = QtWidgets.QSlider()
+        self.gain_dial.valueChanged.connect(self.gainChangeValue)
+        self.layout.addWidget(self.slider1, 3, 0, 1, 2)
+
+        self.layout.addWidget(self.gain_dial, 4, 0)
+
+        self.layout.setRowStretch(0, 0)
+        self.layout.setRowStretch(1, 0)
+        self.layout.setRowStretch(2, 2)
+        self.layout.setRowStretch(3, 2)
+        self.layout.setRowStretch(4, 0)
+
+
+
         Bassline.root_onset()
+
 
 
     def play_audio(self):
