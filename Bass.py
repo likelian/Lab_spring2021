@@ -8,7 +8,7 @@ import mido
 from mido import Message, MidiFile, MidiTrack
 from scipy import signal
 
-import librosa
+#import librosa
 import msaf
 
 import soundfile as sf
@@ -227,16 +227,17 @@ class Bass(object):
             note_idx = np.searchsorted(noteOn, onset[idx])
 
             pitch = roots[note_idx-1]
-            if pitch == -1: pitch += 12
-            elif 0 <= pitch <= 4: pitch += 48
-            else: pitch += 36
+            vel = 64
+            if pitch == -1: pitch += 12; vel = 0
+            elif 0 <= pitch <= 4: pitch += 36
+            else: pitch += 24
 
             if idx == 0: pass;
             else: tickStart = tickStart - onset[idx-1]*125.4*23/3 - tickEnd_prev
             tickEnd_prev = tickEnd
             tickStart = int(tickStart)
             tickEnd = int(tickEnd)
-            track.append(Message('note_on', note=pitch, velocity=64, time=tickStart))
+            track.append(Message('note_on', note=pitch, velocity=vel, time=tickStart))
             track.append(Message('note_off', note=pitch, velocity=127, time=tickEnd))
 
         mid.save('output/midi/bassline.mid')
