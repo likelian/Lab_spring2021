@@ -202,13 +202,14 @@ class Bass(object):
 
     ################################################################################
 
-    def root_onset(self):
+    def root_onset(self, targeted_note_density):
         """
         Bassline
         Root + Onset
         """
 
-        onset = self.onset()
+        onset = self.onset(targeted_note_density=targeted_note_density, density_threshold = 0.1)
+        #onset(self, targeted_note_density=1.5, density_threshold = 0.1)
         roots, np_chords = self.root2midi()
         noteOn = np_chords[0]
         noteOff = np_chords[1]
@@ -228,7 +229,7 @@ class Bass(object):
             note_idx = np.searchsorted(noteOn, onset[idx])
 
             pitch = roots[note_idx-1]
-            vel = 64 + random.randint(-5, 5)
+            vel = 64 + random.randint(-10, 10)
             if pitch == -1: pitch += 12; vel = 0
             elif 0 <= pitch <= 4: pitch += 36
             else: pitch += 24

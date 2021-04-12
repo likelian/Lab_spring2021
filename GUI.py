@@ -20,41 +20,43 @@ from matplotlib.figure import Figure
 
 
 
-
 class MyWidget(QtWidgets.QWidget):
 
     def __init__(self):
         super().__init__()
-
+        #self.outerLayout = QtWidgets.QVBoxLayout()
         self.button1 = QtWidgets.QPushButton("Choose file")
         self.button2 = QtWidgets.QPushButton("Play")
         self.button3 = QtWidgets.QPushButton("Pause")
+        self.button4 = QtWidgets.QPushButton("New Bass")
         #self.button4 = QtWidgets.QPushButton("Play_midi")
         self.gain_dial = QtWidgets.QDial()
-        #self.text = QtWidgets.QLabel("",
-        #                             alignment=QtCore.Qt.AlignCenter)
-
 
         self.layout = QtWidgets.QGridLayout(self)
-        #self.layout.addWidget(self.text)
-        self.layout.addWidget(self.button1, 0, 0, 1, 2)
+
+        self.layout.addWidget(self.button1, 0, 0, 1, 3)
         self.layout.addWidget(self.button2, 1, 0)
         self.layout.addWidget(self.button3, 1, 1)
-        #self.layout.addWidget(self.button4)
-        #self.layout.addWidget(self.gain_dial, 4, 0)
 
 
         self.button1.clicked.connect(self.load_file)
         self.button2.clicked.connect(self.play_audio)
         self.button3.clicked.connect(self.pause_audio)
-        #self.button4.clicked.connect(self.play_midi)
-        #self.gain_dial.valueChanged[int].connect(self.gainChangeValue)
+        self.button4.clicked.connect(self.New_midi)
         self.gain_dial.valueChanged.connect(self.gainChangeValue)
         self.gain = 0.5
 
     @QtCore.Slot()
+
+    def slider1ChangeValue(self, value):
+        self.targeted_note_density = 0.2 + 2*value / 100
+
+    def New_midi(self):
+        self.Bassline.root_onset(self.targeted_note_density)
+
     def gainChangeValue(self, value):
         self.gain = value / 100
+
 
     def load_file(self):
         self.audio_file = str(QtWidgets.QFileDialog.getOpenFileName(self)[0])
@@ -72,6 +74,7 @@ class MyWidget(QtWidgets.QWidget):
 
             return output, pyaudio.paContinue
 
+
         self.p = pyaudio.PyAudio()
         self.stream = self.p.open(format=self.p.get_format_from_width(self.wf.getsampwidth()),
             channels=self.wf.getnchannels(),
@@ -87,10 +90,9 @@ class MyWidget(QtWidgets.QWidget):
         ax.plot(time, self.buffer)
 
 
+        self.Bassline = Bass.Bass(self.audio_file)
 
-        Bassline = Bass.Bass(self.audio_file)
-
-        boundaries = Bassline.structure()
+        boundaries = self.Bassline.structure()
         boundaries_labels = np.empty(len(self.buffer))
         boundaries_labels[:] = np.nan
         for i in boundaries[1:-1]:
@@ -102,10 +104,14 @@ class MyWidget(QtWidgets.QWidget):
         self.layout.addWidget(canvas, 2, 0, 1, 2)
 
         self.slider1 = QtWidgets.QSlider()
-        self.gain_dial.valueChanged.connect(self.gainChangeValue)
-        self.layout.addWidget(self.slider1, 3, 0, 1, 2)
 
-        self.layout.addWidget(self.gain_dial, 4, 0)
+        self.slider1.valueChanged.connect(self.slider1ChangeValue)
+        self.gain_dial.valueChanged.connect(self.gainChangeValue)
+
+        self.layout.addWidget(self.slider1, 4, 0, 1, 2)
+
+        self.layout.addWidget(self.gain_dial, 2, 2)
+        self.layout.addWidget(self.button4, 1, 2)
 
         self.layout.setRowStretch(0, 0)
         self.layout.setRowStretch(1, 0)
@@ -113,10 +119,31 @@ class MyWidget(QtWidgets.QWidget):
         self.layout.setRowStretch(3, 2)
         self.layout.setRowStretch(4, 0)
 
+        targeted_note_density = 1
+        self.Bassline.root_onset(targeted_note_density)
 
 
-        Bassline.root_onset()
+        self.slider_Dict = {}
+        self.slider_func = {}
+        positions = [(0, j) for j in range(len(boundaries)-3)]
 
+        Slider_layout = QtWidgets.QGridLayout(self)
+        for position in positions:
+            self.slider_Dict[position] = QtWidgets.QSlider()
+            Slider_layout.addWidget(self.slider_Dict[position], *position)
+            self.layout.addLayout(Slider_layout, 3, 0, 1, 3)
+
+            def slider1ChangeValue(self, value):
+                self.targeted_note_density = 0.2 + 2*value / 100
+
+            self.slider_Dict[position].valueChanged.connect(self.a)
+
+
+    exec("""
+def a(self, value):
+    b = 0.2 + 2*value / 100
+    print(b)
+""")
 
 
     def play_audio(self):
