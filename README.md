@@ -160,3 +160,29 @@ Possible directions:
 **Next Week (4/4 - 4/11):**
 1. GUI
 2. Real-time playing
+
+
+--------------
+**Last weeek (4/4 - 4/11):**
+1. Playback (need: reload of midi, a slider for playback position?)
+2. Display of music structure
+3. Audio mix control
+4. One slider for density
+5. Create all sliders (don't do anything yet)
+
+**Meeting**
+1. Midi audio sync?
+2. Label time axis
+3. label gain knob
+4. normal gain knob is log scale
+5. number the sliders with each section!
+6. Overall slider?
+7. playback control?
+8. Stop
+9. Quantized slider
+
+**Next Week (4/11 - 4/17):**
+1. Make all sliders works!
+2. Integrate genre classification
+3. More clear explaination
+4. Figure out the mapping

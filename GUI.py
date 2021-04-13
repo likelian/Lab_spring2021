@@ -25,6 +25,9 @@ class MyWidget(QtWidgets.QWidget):
     def __init__(self):
         super().__init__()
         #self.outerLayout = QtWidgets.QVBoxLayout()
+
+        self.slider_val_list = []
+
         self.button1 = QtWidgets.QPushButton("Choose file")
         self.button2 = QtWidgets.QPushButton("Play")
         self.button3 = QtWidgets.QPushButton("Pause")
@@ -52,7 +55,8 @@ class MyWidget(QtWidgets.QWidget):
         self.targeted_note_density = 0.2 + 2*value / 100
 
     def New_midi(self):
-        self.Bassline.root_onset(self.targeted_note_density)
+        #self.Bassline.root_onset(self.targeted_note_density)
+        self.Bassline.root_onset(self.slider_list)
 
     def gainChangeValue(self, value):
         self.gain = value / 100
@@ -124,26 +128,25 @@ class MyWidget(QtWidgets.QWidget):
 
 
         self.slider_Dict = {}
-        self.slider_func = {}
+        #self.slider_func = {}
         positions = [(0, j) for j in range(len(boundaries)-3)]
 
         Slider_layout = QtWidgets.QGridLayout(self)
+        self.slider_list = np.zeros(len(positions))
+        counter = 0
         for position in positions:
-            self.slider_Dict[position] = QtWidgets.QSlider()
-            Slider_layout.addWidget(self.slider_Dict[position], *position)
-            self.layout.addLayout(Slider_layout, 3, 0, 1, 3)
+            self.slider_Dict[counter] = QtWidgets.QSlider()
+            Slider_layout.addWidget(self.slider_Dict[counter], *position)
+            self.slider_Dict[counter].valueChanged.connect(self.slider_slot)
+            counter += 1
 
-            def slider1ChangeValue(self, value):
-                self.targeted_note_density = 0.2 + 2*value / 100
-
-            self.slider_Dict[position].valueChanged.connect(self.a)
+        self.layout.addLayout(Slider_layout, 3, 0, 1, 3)
 
 
-    exec("""
-def a(self, value):
-    b = 0.2 + 2*value / 100
-    print(b)
-""")
+    def slider_slot(self, value):
+        for key, val in self.slider_Dict.items():
+            if val == self.sender():
+                self.slider_list[key] = 0.2 + 2*value / 100
 
 
     def play_audio(self):
@@ -152,7 +155,6 @@ def a(self, value):
 
 
     def midi(self):
-
         clock = pygame.time.Clock()
         self.pygame.music.load(("output/midi/bassline.mid"))
         self.pygame.music.play()
@@ -188,13 +190,11 @@ def a(self, value):
     def get_FileName(self):
         return self.audio_file
 
-
 if __name__ == "__main__":
     app = QtWidgets.QApplication([])
 
     widget = MyWidget()
     widget.resize(800, 600)
     widget.show()
-
 
     sys.exit(app.exec_())

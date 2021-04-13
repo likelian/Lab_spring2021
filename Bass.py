@@ -202,11 +202,12 @@ class Bass(object):
 
     ################################################################################
 
-    def root_onset(self, targeted_note_density):
+    def root_onset(self, targeted_note_density_list):
         """
         Bassline
         Root + Onset
         """
+        targeted_note_density_list
 
         onset = self.onset(targeted_note_density=targeted_note_density, density_threshold = 0.1)
         #onset(self, targeted_note_density=1.5, density_threshold = 0.1)
