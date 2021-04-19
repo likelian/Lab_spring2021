@@ -183,6 +183,18 @@ Possible directions:
 
 **Next Week (4/11 - 4/17):**
 1. Make all sliders works!
-2. Integrate genre classification
 3. More clear explaination
 4. Figure out the mapping
+
+
+--------------
+**Last weeek (4/11 - 4/17):**
+1. Failed to imporve the playback (unable to do anything to the midi playback)
+2. All sliders work now
+3. Provides suggested slider position based on loudness
+
+**Meeting**
+1.
+
+**Next Week (4/17 - 4/):**
+1. 

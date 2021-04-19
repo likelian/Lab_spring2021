@@ -1,5 +1,5 @@
+#!/usr/bin/env python
 import numpy as np
-#import matplotlib.pyplot as plt
 import madmom
 from madmom.audio.chroma import DeepChromaProcessor
 from madmom.features.chords import DeepChromaChordRecognitionProcessor
@@ -15,6 +15,7 @@ import soundfile as sf
 import pyloudnorm as pyln
 import aubio
 import random
+#from midi2audio import FluidSynth
 
 
 ################################################################################
@@ -84,17 +85,20 @@ class Bass(object):
         """
 
         boundaries, labels = msaf.process(self.filename, feature="mfcc", boundaries_id="sf")
+        self.boundaries = boundaries
         return boundaries
 
 
     ################################################################################
 
-    def LUFS(self):
+    def LUFS(self, boundaries_original):
         """
         Loudness
         """
 
-        boundaries = self.structure()
+        #boundaries = self.structure()
+
+        boundaries = boundaries_original[1:-1]
 
         data, rate = sf.read(self.filename) # load audio (with shape (samples, channels))
         meter = pyln.Meter(rate) # create BS.1770 meter
@@ -107,7 +111,7 @@ class Bass(object):
             else:
                 loudness = meter.integrated_loudness(sec_data) # measure loudness
             sec_loudness.append(loudness - Program_loudness)
-
+        self.LUFS_list = sec_loudness
         return sec_loudness
 
 
@@ -141,10 +145,9 @@ class Bass(object):
 
 
 
-
     ################################################################################
 
-    def onset(self, targeted_note_density=1.5, density_threshold = 0.1):
+    def onset(self, targeted_note_density=1.5, targeted_note_density_list=[], density_threshold = 0.1):
         """
         onset
         """
@@ -155,25 +158,49 @@ class Bass(object):
         superflux_3 = madmom.features.onsets.superflux(log_filt_spec)
 
 
-        onset_threshold = 7
-        step = 0.1
-        #targeted_note_density = 1.5
-        #density_threshold = 0.1
-        note_density = 0
-        count = 0
+        def density_to_onset(targeted_note_density, superflux_3, beat, density_threshold = 0.1):
 
-        if abs(note_density - targeted_note_density) <= density_threshold:
-            density_threshold = targeted_note_density*0.5
+            onset_threshold = 7
+            step = 0.1
+            note_density = 0
+            count = 0
 
-        while abs(note_density - targeted_note_density) > density_threshold:
-            count += 1
-            if count >= 2000: print("note density iterated over 2000"); break;
-            difference = note_density - targeted_note_density
-            onset_threshold += step * difference
-            proc = madmom.features.onsets.OnsetPeakPickingProcessor(fps=100, threshold=onset_threshold, combine=0.15)
-            onset = proc(superflux_3)
-            note_density = len(onset) / len(beat)
-            if onset_threshold < 0: print("onset_threshold < 0"); print("note_density", note_density); break
+            if abs(note_density - targeted_note_density) <= density_threshold:
+                density_threshold = targeted_note_density*0.5
+
+            while abs(note_density - targeted_note_density) > density_threshold:
+                count += 1
+                if count >= 2000: print("note density iterated over 2000"); break;
+                difference = note_density - targeted_note_density
+                onset_threshold += step * difference
+                proc = madmom.features.onsets.OnsetPeakPickingProcessor(fps=100, threshold=onset_threshold, combine=0.15)
+
+                section_onset = proc(superflux_3)
+
+                note_density = len(section_onset) / len(beat)
+
+                if onset_threshold < 0: print("onset_threshold < 0"); print("note_density", note_density); break
+
+            return section_onset
+
+
+        onset = np.array([])
+        for idx, targeted_note_density in enumerate(targeted_note_density_list):
+            left_bound = self.boundaries[1:-1][idx]
+            right_bound = self.boundaries[1:-1][idx+1]
+
+            new_superflux_3 = superflux_3[int(left_bound*100) : int(right_bound*100)]
+
+            beat_filter = (beat > left_bound) & (beat < right_bound)
+            new_beat = np.array(beat)[beat_filter]
+
+            if targeted_note_density < 0.001:
+                targeted_note_density = 0.2
+
+            section_onset = density_to_onset(targeted_note_density, new_superflux_3, new_beat, density_threshold)
+            section_onset += left_bound
+
+            onset = np.append(onset, section_onset)
 
 
         mid = MidiFile()
@@ -194,7 +221,6 @@ class Bass(object):
 
         mid.save('output/midi/onset.mid')
 
-
         return onset
 
 
@@ -202,15 +228,15 @@ class Bass(object):
 
     ################################################################################
 
-    def root_onset(self, targeted_note_density_list):
+    def root_onset(self, targeted_note_density, targeted_note_density_list, boundaries):
         """
         Bassline
         Root + Onset
         """
-        targeted_note_density_list
+        #targeted_note_density_list
+        self.boundaries = boundaries
 
-        onset = self.onset(targeted_note_density=targeted_note_density, density_threshold = 0.1)
-        #onset(self, targeted_note_density=1.5, density_threshold = 0.1)
+        onset = self.onset(targeted_note_density, targeted_note_density_list, 0.1)
         roots, np_chords = self.root2midi()
         noteOn = np_chords[0]
         noteOff = np_chords[1]
@@ -229,18 +255,24 @@ class Bass(object):
 
             note_idx = np.searchsorted(noteOn, onset[idx])
 
+            boundaries_idx = np.searchsorted(self.boundaries[1:-1], onset[idx])
+            section_vel = int(1.5 * self.LUFS_list[boundaries_idx-1])
+
+            vel = 64 + random.randint(-10, 10) + section_vel
             pitch = roots[note_idx-1]
-            vel = 64 + random.randint(-10, 10)
             if pitch == -1: pitch += 12; vel = 0
             elif 0 <= pitch <= 4: pitch += 36
             else: pitch += 24
 
             if idx == 0: pass;
             else: tickStart = tickStart - onset[idx-1]*125.4*23/3 - tickEnd_prev
-            tickEnd_prev = tickEnd
             tickStart = int(tickStart)
             tickEnd = int(tickEnd)
+            tickEnd_prev = tickEnd
             track.append(Message('note_on', note=pitch, velocity=vel, time=tickStart))
             track.append(Message('note_off', note=pitch, velocity=127, time=tickEnd))
 
         mid.save('output/midi/bassline.mid')
+
+        #fs = FluidSynth()
+        #fs.midi_to_audio('output/midi/bassline.mid', 'ooutput/midi/bassline.wav')

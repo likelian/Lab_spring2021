@@ -29,8 +29,8 @@ class MyWidget(QtWidgets.QWidget):
         self.slider_val_list = []
 
         self.button1 = QtWidgets.QPushButton("Choose file")
-        self.button2 = QtWidgets.QPushButton("Play")
-        self.button3 = QtWidgets.QPushButton("Pause")
+        self.button2 = QtWidgets.QPushButton("Start Playing")
+        self.button3 = QtWidgets.QPushButton("End Playing")
         self.button4 = QtWidgets.QPushButton("New Bass")
         #self.button4 = QtWidgets.QPushButton("Play_midi")
         self.gain_dial = QtWidgets.QDial()
@@ -55,8 +55,10 @@ class MyWidget(QtWidgets.QWidget):
         self.targeted_note_density = 0.2 + 2*value / 100
 
     def New_midi(self):
-        #self.Bassline.root_onset(self.targeted_note_density)
-        self.Bassline.root_onset(self.slider_list)
+        self.Bassline.root_onset(self.targeted_note_density, self.slider_list, self.boundaries)
+        self.midi_setup()
+
+
 
     def gainChangeValue(self, value):
         self.gain = value / 100
@@ -68,6 +70,8 @@ class MyWidget(QtWidgets.QWidget):
         self.wf = wave.open(self.audio_file, 'rb')
         self.buffer, self.fs = sf.read(self.audio_file)
 
+        self.time = 0 # playback postion in ms
+
 
         def callback(in_data, frame_count, time_info, status):
             #global self.gain
@@ -78,7 +82,6 @@ class MyWidget(QtWidgets.QWidget):
 
             return output, pyaudio.paContinue
 
-
         self.p = pyaudio.PyAudio()
         self.stream = self.p.open(format=self.p.get_format_from_width(self.wf.getsampwidth()),
             channels=self.wf.getnchannels(),
@@ -86,6 +89,7 @@ class MyWidget(QtWidgets.QWidget):
             output=True,
             stream_callback=callback)
         self.stream.stop_stream()
+
 
         # generate the plot
         fig = Figure(figsize=(600,200), dpi=72, facecolor=(1,1,1), edgecolor=(0,0,0))
@@ -96,10 +100,12 @@ class MyWidget(QtWidgets.QWidget):
 
         self.Bassline = Bass.Bass(self.audio_file)
 
-        boundaries = self.Bassline.structure()
+        self.boundaries = self.Bassline.structure()
+        LUFS_list = self.Bassline.LUFS(self.boundaries)
+
         boundaries_labels = np.empty(len(self.buffer))
         boundaries_labels[:] = np.nan
-        for i in boundaries[1:-1]:
+        for i in self.boundaries[1:-1]:
             boundaries_labels[int(i*self.fs)-1] = 1
             boundaries_labels[int(i*self.fs)-2] = -1
         ax.plot(time, boundaries_labels)
@@ -123,19 +129,25 @@ class MyWidget(QtWidgets.QWidget):
         self.layout.setRowStretch(3, 2)
         self.layout.setRowStretch(4, 0)
 
-        targeted_note_density = 1
-        self.Bassline.root_onset(targeted_note_density)
 
 
         self.slider_Dict = {}
         #self.slider_func = {}
-        positions = [(0, j) for j in range(len(boundaries)-3)]
+        positions = [(0, j) for j in range(len(self.boundaries)-3)]
 
         Slider_layout = QtWidgets.QGridLayout(self)
         self.slider_list = np.zeros(len(positions))
         counter = 0
         for position in positions:
             self.slider_Dict[counter] = QtWidgets.QSlider()
+
+
+            slider_val = 60 + int(7 * LUFS_list[counter])
+
+            self.slider_Dict[counter].setValue(slider_val)
+
+            self.slider_list[counter] = 0.125 * 2**(5 * slider_val / 100)
+
             Slider_layout.addWidget(self.slider_Dict[counter], *position)
             self.slider_Dict[counter].valueChanged.connect(self.slider_slot)
             counter += 1
@@ -143,10 +155,23 @@ class MyWidget(QtWidgets.QWidget):
         self.layout.addLayout(Slider_layout, 3, 0, 1, 3)
 
 
+        self.targeted_note_density = 1
+
+        #self.Bassline.root_onset(targeted_note_density, self.slider_list)
+
+        self.New_midi()
+
+
     def slider_slot(self, value):
         for key, val in self.slider_Dict.items():
             if val == self.sender():
-                self.slider_list[key] = 0.2 + 2*value / 100
+                """
+                if value > 50:
+                    self.slider_list[key] = 0.1 + + 0.125 + 1.75 * value / 100
+                else:
+                    self.slider_list[key] = 2 * value / 100
+                """
+                self.slider_list[key] = 0.125 * 2**(5 * value / 100)
 
 
     def play_audio(self):
@@ -154,15 +179,9 @@ class MyWidget(QtWidgets.QWidget):
         self.stream.start_stream()
 
 
-    def midi(self):
-        clock = pygame.time.Clock()
-        self.pygame.music.load(("output/midi/bassline.mid"))
-        self.pygame.music.play()
 
-        #while self.pygame.music.get_busy():
-        #    clock.tick(30) # check if playback has finished
 
-    def play_midi(self):
+    def midi_setup(self):
         # mixer config
         freq = 44100  # audio CD quality
         bitsize = -16   # unsigned 16 bit
@@ -171,20 +190,42 @@ class MyWidget(QtWidgets.QWidget):
         pygame.mixer.init(freq, bitsize, channels, buffer)
         self.pygame = pygame.mixer
         # optional volume 0 to 1.0
+        self.pygame.music.load('output/midi/bassline.mid')
         self.pygame.music.set_volume(1.0)
         # listen for interruptions
         #try:
           # use the midi file you just saved
-        self.midi()
+
+        #self.play_midi()
         #except KeyboardInterrupt:
           # if user hits Ctrl/C then exit
           # (works only in console mode)
         #raise SystemExit
 
+    def play_midi(self):
+        self.clock = pygame.time.Clock()
+        self.clock.tick()
+        #self.pygame.music.unpause()
+        self.pygame.music.play()
+
+
+        #while self.pygame.music.get_busy():
+        #    clock.tick(30) # check if playback has finished
+
     def pause_audio(self):
         self.stream.stop_stream()
+        self.wf.rewind()
+        #self.stream.close()
+        #self.p.terminate()
         self.pygame.music.fadeout(1000)
+        #self.pygame.music.pause()
         self.pygame.music.stop()
+
+        self.clock.tick()
+        last_tick = self.clock.get_time()
+        self.time += last_tick
+
+        print(self.time)
 
 
     def get_FileName(self):
