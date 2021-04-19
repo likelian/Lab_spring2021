@@ -192,9 +192,14 @@ Possible directions:
 1. Failed to imporve the playback (unable to do anything to the midi playback)
 2. All sliders work now
 3. Provides suggested slider position based on loudness
+4. slider^3 gain control
+5. Label time axis
 
 **Meeting**
-1.
 
-**Next Week (4/17 - 4/):**
-1. 
+**Next Week (4/17 - 4/25):**
+1. Splice the midi files
+2. New mapping of the sliders
+3. try on 30 songs, pick the good and bad ones
+4. Slider labels
+5. passing notes

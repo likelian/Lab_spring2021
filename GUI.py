@@ -77,7 +77,8 @@ class MyWidget(QtWidgets.QWidget):
             #global self.gain
             data = self.wf.readframes(frame_count)
             in_data_nda = np.frombuffer(data, dtype=np.int16)
-            output = in_data_nda * self.gain * 0.5
+            #output = in_data_nda * self.gain * 0.5
+            output = in_data_nda * self.gain**3 * 3.162278 * 0.5
             output = output.astype(np.int16)
 
             return output, pyaudio.paContinue
@@ -95,6 +96,8 @@ class MyWidget(QtWidgets.QWidget):
         fig = Figure(figsize=(600,200), dpi=72, facecolor=(1,1,1), edgecolor=(0,0,0))
         ax = fig.add_subplot(111)
         time = np.linspace(0, len(self.buffer) / self.fs, num = len(self.buffer))
+        label = ax.set_xlabel('Seconds', fontsize = 10)
+        ax.xaxis.set_label_coords(1.05, 0)
         ax.plot(time, self.buffer)
 
 
@@ -141,8 +144,12 @@ class MyWidget(QtWidgets.QWidget):
         for position in positions:
             self.slider_Dict[counter] = QtWidgets.QSlider()
 
-
-            slider_val = 60 + int(7 * LUFS_list[counter])
+            LUFS_val = LUFS_list[counter]
+            if LUFS_val > 4.5:
+                LUFS_val = 4.5
+            elif LUFS_val < -4.5:
+                LUFS_val = -4.5
+            slider_val = 55 + int(7 * LUFS_val)
 
             self.slider_Dict[counter].setValue(slider_val)
 
@@ -152,12 +159,10 @@ class MyWidget(QtWidgets.QWidget):
             self.slider_Dict[counter].valueChanged.connect(self.slider_slot)
             counter += 1
 
+
         self.layout.addLayout(Slider_layout, 3, 0, 1, 3)
 
-
         self.targeted_note_density = 1
-
-        #self.Bassline.root_onset(targeted_note_density, self.slider_list)
 
         self.New_midi()
 
@@ -165,12 +170,6 @@ class MyWidget(QtWidgets.QWidget):
     def slider_slot(self, value):
         for key, val in self.slider_Dict.items():
             if val == self.sender():
-                """
-                if value > 50:
-                    self.slider_list[key] = 0.1 + + 0.125 + 1.75 * value / 100
-                else:
-                    self.slider_list[key] = 2 * value / 100
-                """
                 self.slider_list[key] = 0.125 * 2**(5 * value / 100)
 
 
@@ -225,7 +224,7 @@ class MyWidget(QtWidgets.QWidget):
         last_tick = self.clock.get_time()
         self.time += last_tick
 
-        print(self.time)
+        #print(self.time)
 
 
     def get_FileName(self):
