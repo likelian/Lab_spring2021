@@ -8,6 +8,7 @@ import time
 from PySide2 import QtCore, QtWidgets, QtGui
 import Bass
 import pygame
+import subprocess
 
 from matplotlib.backends.qt_compat import QtCore, QtWidgets
 if QtCore.qVersion() >= "5.":
@@ -145,15 +146,22 @@ class MyWidget(QtWidgets.QWidget):
             self.slider_Dict[counter] = QtWidgets.QSlider()
 
             LUFS_val = LUFS_list[counter]
-            if LUFS_val > 4.5:
-                LUFS_val = 4.5
-            elif LUFS_val < -4.5:
-                LUFS_val = -4.5
-            slider_val = 55 + int(7 * LUFS_val)
+            if LUFS_val > 4:
+                LUFS_val = 4
+            elif LUFS_val < -4:
+                LUFS_val = -4
+            slider_val = 52 + int(6 * LUFS_val)
 
             self.slider_Dict[counter].setValue(slider_val)
 
-            self.slider_list[counter] = 0.125 * 2**(5 * slider_val / 100)
+            #self.slider_list[counter] = 0.125 * 2**(5 * slider_val / 100)
+            slider_val /= 100
+            if slider_val <= 0.3:
+                self.slider_list[counter] = 3.25 * slider_val + 0.125
+            elif slider_val > 0.3 and slider_val <= 0.8:
+                self.slider_list[counter] = 1.5 * slider_val + 0.65
+            elif slider_val > 0.8:
+                self.slider_list[counter] = 2.5 * slider_val - 0.15
 
             Slider_layout.addWidget(self.slider_Dict[counter], *position)
             self.slider_Dict[counter].valueChanged.connect(self.slider_slot)
@@ -205,7 +213,10 @@ class MyWidget(QtWidgets.QWidget):
         self.clock = pygame.time.Clock()
         self.clock.tick()
         #self.pygame.music.unpause()
+
         self.pygame.music.play()
+        #subprocess.check_call(['open', '-a', 'Quicktime Player 7', 'output/midi/bassline.mid'])
+        #subprocess.check_call(['tell', 'application', "QuickTime Player 7", 'to', 'set', 'rate', 'of', 'document', '1', 'to', '0.5'])
 
 
         #while self.pygame.music.get_busy():

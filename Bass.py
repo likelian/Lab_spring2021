@@ -15,6 +15,7 @@ import soundfile as sf
 import pyloudnorm as pyln
 import aubio
 import random
+import midi_cut
 #from midi2audio import FluidSynth
 
 
@@ -173,7 +174,7 @@ class Bass(object):
                 if count >= 2000: print("note density iterated over 2000"); break;
                 difference = note_density - targeted_note_density
                 onset_threshold += step * difference
-                proc = madmom.features.onsets.OnsetPeakPickingProcessor(fps=100, threshold=onset_threshold, combine=0.15)
+                proc = madmom.features.onsets.OnsetPeakPickingProcessor(fps=100, threshold=onset_threshold, combine=0.14)
 
                 section_onset = proc(superflux_3)
 
@@ -256,7 +257,7 @@ class Bass(object):
             note_idx = np.searchsorted(noteOn, onset[idx])
 
             boundaries_idx = np.searchsorted(self.boundaries[1:-1], onset[idx])
-            section_vel = int(1.5 * self.LUFS_list[boundaries_idx-1])
+            section_vel = int(1.7 * self.LUFS_list[boundaries_idx-1])
 
             vel = 64 + random.randint(-10, 10) + section_vel
             pitch = roots[note_idx-1]
@@ -273,6 +274,9 @@ class Bass(object):
             track.append(Message('note_off', note=pitch, velocity=127, time=tickEnd))
 
         mid.save('output/midi/bassline.mid')
+
+        midi_cut.midi_cut('output/midi/bassline.mid', self.boundaries)
+        #print(mid)
 
         #fs = FluidSynth()
         #fs.midi_to_audio('output/midi/bassline.mid', 'ooutput/midi/bassline.wav')
