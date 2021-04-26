@@ -8,7 +8,7 @@ import time
 from PySide2 import QtCore, QtWidgets, QtGui
 import Bass
 import pygame
-import subprocess
+from threading import Timer
 
 from matplotlib.backends.qt_compat import QtCore, QtWidgets
 if QtCore.qVersion() >= "5.":
@@ -25,7 +25,6 @@ class MyWidget(QtWidgets.QWidget):
 
     def __init__(self):
         super().__init__()
-        #self.outerLayout = QtWidgets.QVBoxLayout()
 
         self.slider_val_list = []
 
@@ -33,8 +32,8 @@ class MyWidget(QtWidgets.QWidget):
         self.button2 = QtWidgets.QPushButton("Start Playing")
         self.button3 = QtWidgets.QPushButton("End Playing")
         self.button4 = QtWidgets.QPushButton("New Bass")
-        #self.button4 = QtWidgets.QPushButton("Play_midi")
         self.gain_dial = QtWidgets.QDial()
+        self.gain_dial.setValue(50)
 
         self.layout = QtWidgets.QGridLayout(self)
 
@@ -70,15 +69,15 @@ class MyWidget(QtWidgets.QWidget):
         #self.text.setText(self.audio_file)
         self.wf = wave.open(self.audio_file, 'rb')
         self.buffer, self.fs = sf.read(self.audio_file)
+        self.duration = self.wf.getnframes() / self.fs
 
         self.time = 0 # playback postion in ms
 
-
         def callback(in_data, frame_count, time_info, status):
-            #global self.gain
+
             data = self.wf.readframes(frame_count)
             in_data_nda = np.frombuffer(data, dtype=np.int16)
-            #output = in_data_nda * self.gain * 0.5
+
             output = in_data_nda * self.gain**3 * 3.162278 * 0.5
             output = output.astype(np.int16)
 
@@ -122,7 +121,7 @@ class MyWidget(QtWidgets.QWidget):
         self.slider1.valueChanged.connect(self.slider1ChangeValue)
         self.gain_dial.valueChanged.connect(self.gainChangeValue)
 
-        self.layout.addWidget(self.slider1, 4, 0, 1, 2)
+        #self.layout.addWidget(self.slider1, 6, 0, 1, 2)
 
         self.layout.addWidget(self.gain_dial, 2, 2)
         self.layout.addWidget(self.button4, 1, 2)
@@ -136,11 +135,15 @@ class MyWidget(QtWidgets.QWidget):
 
 
         self.slider_Dict = {}
-        #self.slider_func = {}
+        self.play_Dict = {}
+
         positions = [(0, j) for j in range(len(self.boundaries)-3)]
 
         Slider_layout = QtWidgets.QGridLayout(self)
         self.slider_list = np.zeros(len(positions))
+        Play_layout = QtWidgets.QGridLayout(self)
+        self.play_list = np.zeros(len(positions))
+
         counter = 0
         for position in positions:
             self.slider_Dict[counter] = QtWidgets.QSlider()
@@ -154,7 +157,6 @@ class MyWidget(QtWidgets.QWidget):
 
             self.slider_Dict[counter].setValue(slider_val)
 
-            #self.slider_list[counter] = 0.125 * 2**(5 * slider_val / 100)
             slider_val /= 100
             if slider_val <= 0.3:
                 self.slider_list[counter] = 3.25 * slider_val + 0.125
@@ -165,10 +167,18 @@ class MyWidget(QtWidgets.QWidget):
 
             Slider_layout.addWidget(self.slider_Dict[counter], *position)
             self.slider_Dict[counter].valueChanged.connect(self.slider_slot)
+
+
+            self.play_Dict[counter] = QtWidgets.QPushButton("Play ("+str(counter+1)+")")
+            Play_layout.addWidget(self.play_Dict[counter], *position)
+            self.play_Dict[counter].clicked.connect(self.section_midi)
+
             counter += 1
 
 
         self.layout.addLayout(Slider_layout, 3, 0, 1, 3)
+        self.layout.addLayout(Play_layout, 4, 0, 1, 3)
+
 
         self.targeted_note_density = 1
 
@@ -182,9 +192,34 @@ class MyWidget(QtWidgets.QWidget):
 
 
     def play_audio(self):
+
+
+        def timeout():
+            self.pause_audio()
+
+        self.t = Timer(self.duration, timeout)
+
+        self.t.start()
+
         self.play_midi()
         self.stream.start_stream()
 
+
+
+
+    def play_section_audio(self, pos_start, pos_end):
+
+        self.wf.setpos(int(pos_start*self.fs))
+
+        def timeout():
+            self.pause_audio()
+
+        self.t = Timer(pos_end - pos_start, timeout)
+
+        self.pygame.music.play()
+        self.stream.start_stream()
+
+        self.t.start()
 
 
 
@@ -195,47 +230,59 @@ class MyWidget(QtWidgets.QWidget):
         channels = 1  # 1 is mono, 2 is stereo
         buffer = 1024   # number of samples
         pygame.mixer.init(freq, bitsize, channels, buffer)
-        self.pygame = pygame.mixer
+        self.pygame_main = pygame.mixer
         # optional volume 0 to 1.0
-        self.pygame.music.load('output/midi/bassline.mid')
-        self.pygame.music.set_volume(1.0)
-        # listen for interruptions
-        #try:
-          # use the midi file you just saved
+        self.pygame_main.music.load('output/midi/bassline.mid')
+        self.pygame_main.music.set_volume(1.0)
 
-        #self.play_midi()
-        #except KeyboardInterrupt:
-          # if user hits Ctrl/C then exit
-          # (works only in console mode)
-        #raise SystemExit
+
+    def section_midi(self):
+
+        for key, val in self.play_Dict.items():
+
+            if val == self.sender():
+                freq = 44100  # audio CD quality
+                bitsize = -16   # unsigned 16 bit
+                channels = 1  # 1 is mono, 2 is stereo
+                buffer = 1024   # number of samples
+                pygame.mixer.init(freq, bitsize, channels, buffer)
+                self.pygame = pygame.mixer
+
+                midi_file = "output/midi/sections/" + "bassline_" + str(key+1) + ".mid"
+                self.pygame.music.load(midi_file)
+                self.pygame.music.set_volume(1.0)
+                start = self.boundaries[key+1]
+                end = self.boundaries[key+2]
+                if key == 0:
+                    start = 0
+                self.play_section_audio(start, end)
+
+
 
     def play_midi(self):
+        self.midi_setup()
         self.clock = pygame.time.Clock()
         self.clock.tick()
-        #self.pygame.music.unpause()
-
-        self.pygame.music.play()
-        #subprocess.check_call(['open', '-a', 'Quicktime Player 7', 'output/midi/bassline.mid'])
-        #subprocess.check_call(['tell', 'application', "QuickTime Player 7", 'to', 'set', 'rate', 'of', 'document', '1', 'to', '0.5'])
-
-
-        #while self.pygame.music.get_busy():
-        #    clock.tick(30) # check if playback has finished
+        self.pygame_main.music.play()
 
     def pause_audio(self):
         self.stream.stop_stream()
         self.wf.rewind()
-        #self.stream.close()
-        #self.p.terminate()
-        self.pygame.music.fadeout(1000)
-        #self.pygame.music.pause()
-        self.pygame.music.stop()
 
-        self.clock.tick()
-        last_tick = self.clock.get_time()
-        self.time += last_tick
+        try:
+            self.pygame_main.music.fadeout(1000)
+            self.pygame_main.music.stop()
+        except:
+            pass
 
-        #print(self.time)
+        try:
+            self.pygame.music.fadeout(1000)
+            self.pygame.music.stop()
+        except:
+            pass
+
+        self.t.cancel()
+
 
 
     def get_FileName(self):

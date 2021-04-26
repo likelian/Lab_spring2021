@@ -196,10 +196,26 @@ Possible directions:
 5. Label time axis
 
 **Meeting**
+1.
 
-**Next Week (4/17 - 4/25):**
+**Next Week (4/17 - 4/):**
 1. Splice the midi files
 2. New mapping of the sliders
 3. try on 30 songs, pick the good and bad ones
 4. Slider labels
 5. passing notes
+
+
+--------------
+**Last weeek (4/17 - 4/25):**
+1. Tested on 30 songs
+2. New slider mapping
+3. Section playback
+4. passing notes
+
+**Meeting**
+1.number the visual segments
+2.DONE gain knob initial position
+3.without bass, loud bass, normal bass
+4. 60s talk: motivation, outcome, methods
+5. poster, all 3rd libraries; audio and corresponding settings

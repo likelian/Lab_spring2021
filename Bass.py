@@ -74,7 +74,35 @@ class Bass(object):
 
         mid.save('output/midi/root.mid')
 
+
         return roots, np_chords
+
+
+
+    ################################################################################
+
+    def key(self):
+        proc = madmom.features.key.CNNKeyRecognitionProcessor()
+        prediction = proc(self.filename)
+        key_name = madmom.features.key.key_prediction_to_label(prediction)
+
+        scale = np.array([0, 2, 4, 5, 7, 9, 11])
+        scale += 12
+        scale -= 3
+        KEY_LABELS = ['A major', 'Bb major', 'B major', 'C major', 'Db major',
+              'D major', 'Eb major', 'E major', 'F major', 'F# major',
+              'G major', 'Ab major', 'A minor', 'Bb minor', 'B minor',
+              'C minor', 'C# minor', 'D minor', 'D# minor', 'E minor',
+              'F minor', 'F# minor', 'G minor', 'G# minor']
+
+        idx = KEY_LABELS.index(key_name)
+        if idx >= 12: idx -= 12
+        scale += idx
+
+        scale = np.concatenate((scale, scale+12, scale+24, scale+36, scale+48, scale+60))
+        #print(scale)
+        return scale
+
 
 
 
@@ -225,6 +253,54 @@ class Bass(object):
         return onset
 
 
+    ################################################################################
+
+    def passing_notes(self, midi_file):
+        scale = self.key()
+
+        mid = MidiFile(midi_file)
+
+        for i, track in enumerate(mid.tracks):
+
+            mid_new = MidiFile()
+            track_new = MidiTrack()
+            mid_new.tracks.append(track_new)
+            track_new.append(Message('program_change', program=33, time=0))
+
+            note_list = np.array([0, 0, 0])
+            write_head = 0
+            msg_prev = None
+            for msg in track:
+
+                if msg.type == 'note_on':
+                    note = msg.note
+
+                    note_list[write_head] = note
+                    if abs(note_list[write_head] - note_list[write_head-1]) == 3:
+                        if note_list[write_head-1] == note_list[write_head-2]:
+                            if note_list[write_head] > note_list[write_head-1]:
+                                note_prev = scale[(scale > note_list[write_head-1]) & (scale < note_list[write_head])][0]
+
+                            if note_list[write_head] < note_list[write_head-1]:
+                                note_prev = scale[(scale < note_list[write_head-1]) & (scale > note_list[write_head])][0]
+
+                    write_head += 1
+                    if write_head > 2:
+                        write_head = 0
+
+                if msg_prev is not None:
+                    if msg_prev.type == 'note_on' or msg_prev.type == 'note_off':
+                        note_prev = msg_prev.note
+                        track_new.append(Message(msg_prev.type, note=note_prev, velocity=msg_prev.velocity, time=msg_prev.time))
+                    else:
+                        track_new.append(msg_prev)
+
+                msg_prev = msg.copy()
+
+        mid_new.save('output/midi/bassline_passing_notes.mid')
+
+
+
 
 
     ################################################################################
@@ -234,7 +310,7 @@ class Bass(object):
         Bassline
         Root + Onset
         """
-        #targeted_note_density_list
+
         self.boundaries = boundaries
 
         onset = self.onset(targeted_note_density, targeted_note_density_list, 0.1)
@@ -275,8 +351,6 @@ class Bass(object):
 
         mid.save('output/midi/bassline.mid')
 
-        midi_cut.midi_cut('output/midi/bassline.mid', self.boundaries)
-        #print(mid)
+        self.passing_notes('output/midi/bassline.mid')
 
-        #fs = FluidSynth()
-        #fs.midi_to_audio('output/midi/bassline.mid', 'ooutput/midi/bassline.wav')
+        midi_cut.midi_cut('output/midi/bassline_passing_notes.mid', self.boundaries)
